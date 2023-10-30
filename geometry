@@ -1,0 +1,154 @@
+#define int long long
+#define double long double
+
+using namespace std;
+
+const int oo = 1e18;
+
+typedef struct Point
+{
+    int x, y;
+    Point(int x = 0, int y = 0) : x(x), y(y) {}
+
+    bool operator< (const Point &that) const
+    {
+        return (x == that.x) ? y < that.y : x < that.x;
+    }
+
+    bool operator> (const Point &that) const
+    {
+        return (x == that.x) ? y > that.y : x > that.x;
+    }
+}
+Vector;
+
+struct Line // Ax + By + C = 0
+{
+    int A, B, C;
+    Line(int A = 0, int B = 0, int C = 0) : A(A), B(B), C(C) {}
+    Line(const Point &P1, const Point &P2)
+    {
+        A = P2.y - P1.y;
+        B = P1.x - P2.x;
+        C = P2.x * P1.y - P1.x * P2.y;
+    }
+
+    int Calc(const Point &P) const
+    {
+        return A * P.x + B * P.y + C;
+    }
+};
+
+struct Segment
+{
+    Point A, B;
+    Segment(const Point &A = Point(), const Point &B = Point()) : A(A), B(B) {}
+};
+
+Vector operator- (const Vector &A, const Vector &B)
+{
+    return Vector(B.x - A.x, B.y - A.y);
+}
+
+Vector operator+ (const Vector &A, const Vector &B)
+{
+    return Vector(B.x + A.x, B.y + A.y);
+}
+
+int dot(const Vector &A, const Vector &B)
+{
+    return A.x * B.x + A.y * B.y;
+}
+
+int dot(const Point &A, const Point &B, const Point &C)
+{
+    return dot(B - A, C - A);
+}
+
+int cross(const Vector &A, const Vector &B)
+{
+    return A.x * B.y - B.x * A.y;
+}
+
+int cross(const Point &A, const Point &B, const Point &C)
+{
+    return cross(B - A, C - A);
+}
+
+double distance(const Vector &A)
+{
+    return sqrt((double)1.0 * A.x * A.x + (double)1.0 * A.y * A.y);
+}
+
+double distance(const Point &A, const Point &B)
+{
+    return distance(B - A);
+}
+
+double distance(const Point &A, const Point &B, const Point &C)
+{
+    return (double)1.0 * abs(cross(A, B, C)) / distance(A, B);
+}
+
+double distance(const Point &P, const Line &L)
+{
+    return (double)1.0 * abs(L.Calc(P)) / sqrt((double)(L.A * L.A + L.B * L.B));
+}
+
+double distance(const Point &P, const Segment &S)
+{
+    if (dot(S.A, S.B, P) < 0) return distance(P, S.A);
+    if (dot(S.B, S.A, P) < 0) return distance(P, S.B);
+    return distance(S.A, S.B, P);
+}
+
+typedef vector<Point> Polygon;
+
+double distance(const Point &P, Polygon &Poly)
+{
+    Poly.push_back(Poly.front());
+    double ans = 1e18;
+    for (int i = 1; i < (int)Poly.size(); i++) {
+        ans = min(ans, distance(P, Segment(Poly[i - 1], Poly[i])));
+    }
+    Poly.pop_back();
+    return ans;
+}
+
+Polygon GrahamScan(vector<Point> &VP)
+{
+    Polygon Convex;
+    
+    for (Point &P : VP) {
+        if (P > VP.front()) swap(VP.front(), P);
+    }
+
+    sort(VP.begin() + 1, VP.end(), [&] (const Point &A, const Point& B)
+    {
+        int cw = cross(VP.front(), A, B);
+        if (cw == 0) return A < B;
+        return cw > 0;
+    });
+
+    VP.push_back(VP.front());
+
+    for (Point &P : VP) {
+        int siz = Convex.size();
+        if (siz >= 2 && cross(Convex[siz - 2], Convex[siz - 1], P) <= 0) Convex.pop_back(), siz--;
+        Convex.push_back(P);
+    }
+
+    VP.pop_back();
+    return Convex;
+}
+
+int Area(Polygon &Poly)
+{
+    int ans = 0;
+    Poly.push_back(Poly.front());
+    for (int i = 1; i < (int)Poly.size(); i++) {
+        ans += (Poly[i].x - Poly[i - 1].x) * (Poly[i].y + Poly[i - 1].y);
+    }
+    Poly.pop_back();
+    return abs(ans);
+}
