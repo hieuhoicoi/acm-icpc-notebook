@@ -1,3 +1,16 @@
+int low[maxn], num[maxn], joint[maxn], bridge, n, m;
+vi g[maxn];
+
+void graph_init()
+{
+	cin >> n >> m;
+	while(m--)
+	{
+		int u, v; cin >> u >> v;
+		g[u].pb(v); g[v].pb(u);
+	}
+}
+
 namespace bridgeAndJoint
 {
     int timeDfs = 0;
@@ -15,10 +28,16 @@ namespace bridgeAndJoint
                 if (low[v] == num[v]) bridge++;
                 child++;
                 if (u == pre)
+                {
                     if (child > 1) joint[u] = true;
+                }
                 else if (low[v] >= num[u]) joint[u] = true;
             }
             else low[u] = min(low[u], num[v]);
         }
+    }
+    void init()
+    {
+    	fore(i, 1, n) if (!num[i]) dfs(i, i);
     }
 };
