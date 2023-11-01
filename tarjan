@@ -1,5 +1,9 @@
+int scc, low[maxn], num[maxn], deleted[maxn];
+vi g[maxn];
+stack<int> st;
 namespace tarjan
 {
+	int timeDfs = 0;
     void dfs(int u)
     {
         num[u] = low[u] = ++timeDfs;
@@ -26,5 +30,9 @@ namespace tarjan
             }
             while (v != u);
         }
+    }
+    void init()
+    {
+    	fore(i, 1, n) if (!num[i]) dfs(i, i);
     }
 };
